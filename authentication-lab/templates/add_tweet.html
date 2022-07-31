@@ -6,6 +6,12 @@
 </head>
 <body>
     Great Job!
-    <a href = "{{url_for('home')}}">Home</a>
+    <a href = "{{url_for('signout')}}">Signout</a>
+
+    <form action = "/add_tweet" method = "POST"> 
+        <input type = "text"name = "title" placeholder="Title">
+        <input type = "text"name = "text" placeholder="Enter Text" maxlength="280">
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>

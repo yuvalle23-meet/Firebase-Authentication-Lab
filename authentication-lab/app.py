@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask import session as login_session
 import pyrebase
+from datetime import datetime
 
 
 
@@ -21,12 +22,13 @@ config = {
 
   "measurementId": "G-FMR35DC9HN",
 
-  "databaseURL": ""
+  "databaseURL": "https://authentication-lab-e94aa-default-rtdb.europe-west1.firebasedatabase.app/"
 
 }
 
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
+db = firebase.database()
 
 
 
@@ -57,8 +59,14 @@ def signup():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        full_name = request.form['fullname']
+        username = request.form['username']
+        bio = request.form['bio']
+
         try:
             login_session['user'] = auth.create_user_with_email_and_password(email, password)
+            user = {"fullname" : full_name, "username":username, "bio":bio}
+            db.child("Users").child(login_session['user']['localId']).set(user)
             return redirect(url_for('add_tweet'))
         except: 
             error = "Authentication failed"
@@ -68,11 +76,34 @@ def signup():
 
 @app.route('/add_tweet', methods=['GET', 'POST'])
 def add_tweet():
+    if request.method == "POST":
+        title = request.form['title']
+        text = request.form['text']
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        tweet = {"title":title, "text":text, "uid":login_session['user']['localId'], "timestamp":current_time, "likes":0}
+        db.child("tweets").push(tweet)
+        tweets = db.child("tweets").get().val()
+        
+        return all_tweets(tweets)
     return render_template("add_tweet.html")
 
-@app.route('/home')
-def home():
-    return render_template("home.html")
+@app.route('/like/<string:uid>')
+def add_like(uid):
+    updated = db.child('tweets').child(uid).get().val()
+    print(updated)
+    updated['likes']+= 1
+    db.child('tweets').child(uid).update(updated)
+    tweets = db.child('tweets').get().val()
+    return all_tweets(tweets)
+    
+    
+
+
+@app.route('/all_tweets')
+def all_tweets(tweet):
+
+    return render_template('all_tweets.html', tweet = tweet)
 
 @app.route('/signout')
 def signout():
@@ -84,4 +115,4 @@ def signout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 5001)

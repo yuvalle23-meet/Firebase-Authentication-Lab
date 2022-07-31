@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <ul>
+        
+        {%for key, value in tweet.items()%}
+        {%for key1, value1 in value.items()%}
+        {%if key1 == "uid"%}
+        
+        <li> Tweet: </li>        
+        {%endif%}
+        {%if key1 == "text"%}
+        <li> Text: {{value1}} </li>        
+        {%endif%}
+        {%if key1 == "title"%}
+        <li> Title: {{value1}} </li>        
+        {%endif%}
+        {%if key1 == "timestamp"%}
+        <li> Time Created: {{value1}}</li>        
+        {%endif%}
+        {%if key1 == "likes"%}
+        <li> Likes: {{value1}}</li>  
+        <a href= "{{url_for('add_like', uid = key)}}">Like</a>      
+        {%endif%}
+
+
+        
+
+        {%endfor%}
+        {%endfor%}
+    </ul>
+
+
+</body>
+</html>
